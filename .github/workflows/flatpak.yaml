@@ -24,6 +24,7 @@ jobs:
       - name: Build Flatpak
         run: |
           devenv shell
+          yarn
           yarn make --targets '@electron-forge/maker-flatpak'
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
