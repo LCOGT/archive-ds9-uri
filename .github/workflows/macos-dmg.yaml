@@ -26,14 +26,13 @@ jobs:
           eval "$(devenv print-dev-env)"
           yarn
           yarn make --targets '@electron-forge/maker-dmg'
-          ls -lhR ./out/make
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: dmg
-          path: ./out/make/dmg/*/*.dmg
+          path: ./out/make/*.dmg
       - name: Add flatpack to release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v1
         with:
-          files: ./out/make/dmg/*/*.dmg
+          files: ./out/make/*.dmg
