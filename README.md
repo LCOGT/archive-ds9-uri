@@ -22,7 +22,7 @@ Build distribution artifacts (via `electron-forge`):
 yarn make
 ```
 
-Install `flatpak`:
+Install application using built `flatpak` (on Linux):
 
 ```shell
 flatpak --user install out/make/flatpak/x86_64/io.atom.electron.archive-electron-ds9-uri_stable_x86_64.flatpak
