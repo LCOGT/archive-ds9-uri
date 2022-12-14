@@ -1,34 +1,63 @@
-const { app, BrowserWindow, protocol } = require("electron")
+const { app, BrowserWindow, protocol, dialog } = require("electron")
 const  { URL } = require("url")
-const { spawn } = require('node:child_process')
+const { spawn } = require("node:child_process")
+const path = require("path")
 
-const createWindow = () => {
-  const win = new BrowserWindow();
 
-  win.loadURL("http://archive-dev.lco.gtn/");
-};
+if (process.defaultApp) {
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient("lcods9", process.execPath, [path.resolve(process.argv[1])])
+  }
+} else {
+    app.setAsDefaultProtocolClient("lcods9")
+}
 
-app.whenReady().then(() => {
-  protocol.registerHttpProtocol("lcods9", (request, callback) => {
-    const u = new URL(request.url)
-    console.log(u)
+const gotTheLock = app.requestSingleInstanceLock()
 
-    // Launch an external command
-    const ds9 = spawn("ds9", args=[], options={shell: true})
+if (!gotTheLock) {
+  app.quit()
+} else {
+  app.on('second-instance', (event, commandLine, workingDirectory) => {
+    const lastArg = commandLine.at(-1)
+    if (lastArg.startsWith("lcods9://")) {
+      handleURL(lastArg)
+    }
 
   })
 
-  createWindow();
+  app.whenReady().then(() => {
+    createWindow()
 
-  app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
+    const lastArg = process.argv.at(-1)
+    if (lastArg.startsWith("lcods9://")) {
+      handleURL(lastArg)
     }
-  });
-});
+  })
+
+  app.on('open-url', (event, url) => {
+    event.preventDefault()
+    handleURL(url)
+  })
+}
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();
   }
-});
+})
+
+const createWindow = () => {
+  const win = new BrowserWindow();
+
+  win.loadFile("index.html");
+}
+
+const handleURL = (url) => {
+  const u = new URL(url)
+
+  // TODO: add real DS9 command
+  dialog.showErrorBox('Welcome Back', `You arrived from: ${url}`)
+
+  // Launch an external command
+  //const ds9 = spawn("ds9", args=[], options={shell: true})
+}
