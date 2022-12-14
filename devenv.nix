@@ -9,6 +9,7 @@
     pkgs.dpkg
     pkgs.fakeroot
     pkgs.rpm
+    pkgs.flatpak
     pkgs.flatpak-builder
     pkgs.elfutils
     pkgs.debugedit
