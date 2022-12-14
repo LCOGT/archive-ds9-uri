@@ -10,19 +10,19 @@ module.exports = {
   rebuildConfig: {},
   makers: [
     {
-      name: '@electron-forge/maker-zip',
+      name: "@electron-forge/maker-zip",
       platforms: ['darwin', 'linux'],
     },
     {
-      name: '@electron-forge/maker-dmg',
+      name: "@electron-forge/maker-dmg",
       config: {},
     },
     {
-      name: '@electron-forge/maker-flatpak',
+      name: "@electron-forge/maker-flatpak",
       config: {
         options: {
           runtimeVersion: "22.08",
-          mimeType: ['x-scheme-handler/lcods9'],
+          mimeType: ["x-scheme-handler/lcods9"],
           modules: [
             {
               name: "zypak",
