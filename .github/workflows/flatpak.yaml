@@ -1,0 +1,37 @@
+name: flatpack
+on:
+  push:
+    branches: 
+      - main
+  release:
+    types:
+      - published
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Chekcout
+        uses: actions/checkout@v3
+      - name: Install Nix
+        uses: cachix/install-nix-action@v18
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+      - name: Install devenv
+        run: |
+          nix-env -iA cachix -f https://cachix.org/api/v1/install
+          cachix use devenv
+          nix-env -if https://github.com/cachix/devenv/tarball/v0.4
+      - name: Build Flatpak
+        run: |
+          devenv shell
+          yarn make --targets '@electron-forge/maker-flatpak'
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: flatpak
+          path: ./out/make/flatpak/*/*.flatpak
+      - name: Add flatpack to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ./out/make/flatpak/*/*.flatpak
