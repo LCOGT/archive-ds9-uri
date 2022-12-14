@@ -23,6 +23,8 @@ jobs:
           nix-env -if https://github.com/cachix/devenv/tarball/v0.4
       - name: Build Flatpak
         run: |
+          devenv shell
+          devenv shell flatpak --user remotes -d
           devenv shell yarn
           devenv shell yarn make --targets '@electron-forge/maker-flatpak'
       - name: Upload artifacts
