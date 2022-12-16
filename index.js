@@ -1,15 +1,16 @@
-const { app, BrowserWindow, protocol, dialog } = require("electron")
-const  { URL } = require("url")
-const { spawn } = require("node:child_process")
-const path = require("path")
-
+const { app, BrowserWindow, protocol, dialog } = require("electron");
+const  { URL } = require("url");
+const { spawn } = require("node:child_process");
+const https = require('https');
+const fs = require("fs");
+const path = require("path");
 
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
-    app.setAsDefaultProtocolClient("lcods9", process.execPath, [path.resolve(process.argv[1])])
+    app.setAsDefaultProtocolClient("archive+ds9", process.execPath, [path.resolve(process.argv[1])])
   }
 } else {
-    app.setAsDefaultProtocolClient("lcods9")
+    app.setAsDefaultProtocolClient("archive+ds9")
 }
 
 const gotTheLock = app.requestSingleInstanceLock()
@@ -19,7 +20,7 @@ if (!gotTheLock) {
 } else {
   app.on('second-instance', (event, commandLine, workingDirectory) => {
     const lastArg = commandLine.at(-1)
-    if (lastArg.startsWith("lcods9://")) {
+    if (lastArg.startsWith("archive+ds9://")) {
       handleURL(lastArg)
     }
 
@@ -29,7 +30,7 @@ if (!gotTheLock) {
     createWindow()
 
     const lastArg = process.argv.at(-1)
-    if (lastArg.startsWith("lcods9://")) {
+    if (lastArg.startsWith("archive+ds9://")) {
       handleURL(lastArg)
     }
   })
@@ -52,12 +53,110 @@ const createWindow = () => {
   win.loadFile("index.html");
 }
 
-const handleURL = (url) => {
-  const u = new URL(url)
+async function downloadFile(url, destination) {
+  return new Promise(function(resolve, reject) {
+    const file = fs.createWriteStream(destination);
+    const request = https.get(url, function(response) {
+      response.pipe(file);
+      // after download completed close filestream and resolve promise
+      file.on("finish", () => {
+        file.close();
+        resolve();
+      });
+    });
+  });
+}
 
-  // TODO: add real DS9 command
-  dialog.showErrorBox('Welcome Back', `You arrived from: ${url}`)
+async function getFrameRecord(frameUrl, token) {
+  return new Promise(function (resolve, reject) {
+    var options = {
+      headers: { Authorization: "Token " + token }
+    }
+    var req = https.get(frameUrl, options, function(res) {
+      res.on('data', function (data) {
+        var response = JSON.parse(data);
+        resolve(response);
+      });
+    });
+  });
+}
 
-  // Launch an external command
-  //const ds9 = spawn("ds9", args=[], options={shell: true})
+async function handleURL(url) {
+  const u = new URL(url);
+
+  let urlParams = u.searchParams;
+  const mkdirChild = spawn("mkdir", args=["/tmp/archive_download"], {env: {PATH: process.env.PATH}}, options={shell: true});
+
+  let frameRecordCalls = [];
+  for (frame of urlParams.get("frame_ids").split(",")) {
+    frameUrl = urlParams.get("frame_url") + frame + "/";
+    frameRecordCalls.push(getFrameRecord(frameUrl, urlParams.get('token')));
+  }
+
+  let frameRecords = await Promise.all(frameRecordCalls);
+
+  let downloadCalls = [];
+  for (record of frameRecords) {
+    let destination = "/tmp/archive_download/" + record.filename;
+    downloadCalls.push(downloadFile(record.url, destination));
+  }
+
+  await Promise.all(downloadCalls);
+  console.log("Opening DS9!");
+
+  if (frameRecords[0].instrument_id.includes("fa") && frameRecords[0].reduction_level === 0) {
+    // open in mosaic mode
+    ds9Args = [
+      "-geometry",
+      "1000x1000",
+      "-view",
+      "keyword",
+      "yes",
+      "-view",
+      "keyvalue",
+      "filter",
+      "-view",
+      "frame",
+      "no",
+      "-zscale",
+      "-lock",
+      "frame",
+      "image",
+      "-lock",
+      "scale",
+      "yes",
+      "-mosaicimage",
+      "iraf",
+      "/tmp/archive_download/*"
+    ]
+  }
+  else {
+    // open in non-mosaic modes
+    ds9Args = [
+      "-geometry",
+      "1000x1000",
+      "-view",
+      "keyword",
+      "yes",
+      "-view",
+      "keyvalue",
+      "filter",
+      "-view",
+      "frame",
+      "no",
+      "-zscale",
+      "-lock",
+      "frame",
+      "image",
+      "-lock",
+      "scale",
+      "yes",
+      "/tmp/archive_download/*"
+    ]
+  }
+  const ds9Child = spawn("ds9", args=ds9Args, {env: {PATH: "/usr/local/bin"}}, options={shell: true});
+
+  ds9Child.on("exit", function() {
+    const rmChild = spawn("rm", args=["-rf", "/tmp/archive_download"], {env: {PATH: process.env.PATH}}, options={shell: true});
+  })
 }
