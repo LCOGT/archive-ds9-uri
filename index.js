@@ -5,15 +5,15 @@ const https = require('https');
 const fs  = require("fs");
 const path = require("path");
 
-const SCHEMA = "archive+ds9";
+const SCHEME = "archive+ds9";
 const DOWNLOAD_PATH = path.join('/tmp', 'archive_download');
 
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
-    app.setAsDefaultProtocolClient(SCHEMA, process.execPath, [path.resolve(process.argv[1])])
+    app.setAsDefaultProtocolClient(SCHEME, process.execPath, [path.resolve(process.argv[1])])
   }
 } else {
-    app.setAsDefaultProtocolClient(SCHEMA)
+    app.setAsDefaultProtocolClient(SCHEME)
 }
 
 const gotTheLock = app.requestSingleInstanceLock()
@@ -23,7 +23,7 @@ if (!gotTheLock) {
 } else {
   app.on("second-instance", (event, commandLine, workingDirectory) => {
     const lastArg = commandLine.at(-1)
-    if (lastArg.startsWith(`{SCHEMA}://`)) {
+    if (lastArg.startsWith(`{SCHEME}://`)) {
       handleURL(lastArg)
     }
 
@@ -33,7 +33,7 @@ if (!gotTheLock) {
     createWindow()
 
     const lastArg = process.argv.at(-1)
-    if (lastArg.startsWith(`{SCHEMA}://`)) {
+    if (lastArg.startsWith(`{SCHEME}://`)) {
       handleURL(lastArg)
     }
   })

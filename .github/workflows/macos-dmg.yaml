@@ -1,8 +1,9 @@
 name: macos-dmg
 on:
   push:
-    branches: 
+    branches:
       - main
+      - feature/*
   release:
     types:
       - published
@@ -31,7 +32,7 @@ jobs:
         with:
           name: dmg
           path: ./out/make/*.dmg
-      - name: Add flatpack to release
+      - name: Add DMG to release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v1
         with:

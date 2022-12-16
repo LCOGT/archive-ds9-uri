@@ -1,8 +1,9 @@
 name: flatpack
 on:
   push:
-    branches: 
+    branches:
       - main
+      - feature/*
   release:
     types:
       - published
