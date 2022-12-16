@@ -1,9 +1,9 @@
 const { app, BrowserWindow, protocol, dialog } = require("electron");
 const  { URL } = require("url");
 const { spawn } = require("node:child_process");
-const { https } = require('https');
-const { fs } = require("fs");
-const { path } = require("path");
+const https = require('https');
+const fs  = require("fs");
+const path = require("path");
 
 const SCHEMA = "archive+ds9"
 
