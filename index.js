@@ -5,7 +5,8 @@ const https = require('https');
 const fs  = require("fs");
 const path = require("path");
 
-const SCHEMA = "archive+ds9"
+const SCHEMA = "archive+ds9";
+const DOWNLOAD_PATH = path.join('/tmp', 'archive_download');
 
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
@@ -87,7 +88,7 @@ async function handleURL(url) {
   const u = new URL(url);
 
   let urlParams = u.searchParams;
-  const mkdirChild = spawn("mkdir", args=["/tmp/archive_download"], {env: {PATH: process.env.PATH}}, options={shell: true});
+  const mkdirChild = spawn("mkdir", args=[DOWNLOAD_PATH], {env: {PATH: process.env.PATH}}, options={shell: true});
 
   let frameRecordCalls = [];
   for (frame of urlParams.get("frame_ids").split(",")) {
@@ -99,7 +100,7 @@ async function handleURL(url) {
 
   let downloadCalls = [];
   for (record of frameRecords) {
-    let destination = "/tmp/archive_download/" + record.filename;
+    let destination = path.join(DOWNLOAD_PATH, record.filename);
     downloadCalls.push(downloadFile(record.url, destination));
   }
 
@@ -156,9 +157,9 @@ async function handleURL(url) {
       "/tmp/archive_download/*"
     ]
   }
-  const ds9Child = spawn("ds9", args=ds9Args, {env: {PATH: "/usr/local/bin"}}, options={shell: true});
+  const ds9Child = spawn("ds9", args=ds9Args, {env: {PATH: process.env.PATH}}, options={shell: true});
 
   ds9Child.on("exit", function() {
-    const rmChild = spawn("rm", args=["-rf", "/tmp/archive_download"], {env: {PATH: process.env.PATH}}, options={shell: true});
+    const rmChild = spawn("rm", args=["-rf", DOWNLOAD_PATH], {env: {PATH: process.env.PATH}}, options={shell: true});
   })
 }
