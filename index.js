@@ -113,9 +113,11 @@ async function handleURL(url) {
   windowAbortController.abort();
 
   // read in command line args for DS9 based on frame metadata
-  let argsObj = JSON.parse(fs.readFileSync(path.join('./', 'ds9_args.json')));
-  let ds9Args = (frameRecords[0].instrument_id.includes("fa") && frameRecords[0].reduction_level === 0) ? argsObj.mosaic : argsObj.nonMosaic
-  const ds9Child = spawn("ds9", args=ds9Args, {env: {PATH: process.env.PATH}}, options={shell: true});
+  let argsObj = JSON.parse(fs.readFileSync(path.join(app.getAppPath(), 'ds9_args.json')));
+  let ds9Args = (frameRecords[0].instrument_id.includes("fa") && frameRecords[0].reduction_level === 0) ? argsObj.mosaic : argsObj.nonMosaic;
+  // need to add /usr/local/bin to PATH to find ds9
+  const ds9Child = spawn("ds9", args=ds9Args, {env: {PATH: process.env.PATH + ":/usr/local/bin"}}, options={shell: true});
+
 
   // clear out temp directory when user closes DS9
   ds9Child.on("exit", function() {
