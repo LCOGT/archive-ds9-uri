@@ -18,6 +18,9 @@
         "-lock",
         "scale",
         "yes",
+        "-lock",
+        "colorbar",
+        "yes",
         "-mosaicimage",
         "iraf",
         "/tmp/archive_download/*"
@@ -40,6 +43,9 @@
         "image",
         "-lock",
         "scale",
+        "yes",
+        "-lock",
+        "colorbar",
         "yes",
         "/tmp/archive_download/*"
       ]
