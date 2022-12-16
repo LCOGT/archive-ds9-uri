@@ -61,7 +61,6 @@ async function downloadFile(url, destination) {
     const file = fs.createWriteStream(destination);
     const request = https.get(url, function(response) {
       response.pipe(file);
-      // after download completed close filestream and resolve promise
       file.on("finish", () => {
         file.close();
         resolve();
@@ -90,6 +89,7 @@ async function handleURL(url) {
   let urlParams = u.searchParams;
   const mkdirChild = spawn("mkdir", args=[DOWNLOAD_PATH], {env: {PATH: process.env.PATH}}, options={shell: true});
 
+  // fetch archive frame records in parallel
   let frameRecordCalls = [];
   for (frame of urlParams.get("frame_ids").split(",")) {
     frameUrl = urlParams.get("frame_url") + frame + "/";
@@ -98,6 +98,7 @@ async function handleURL(url) {
 
   let frameRecords = await Promise.all(frameRecordCalls);
 
+  // download files in parallel
   let downloadCalls = [];
   for (record of frameRecords) {
     let destination = path.join(DOWNLOAD_PATH, record.filename);
@@ -105,60 +106,13 @@ async function handleURL(url) {
   }
 
   await Promise.all(downloadCalls);
-  console.log("Opening DS9!");
 
-  if (frameRecords[0].instrument_id.includes("fa") && frameRecords[0].reduction_level === 0) {
-    // open in mosaic mode
-    ds9Args = [
-      "-geometry",
-      "1000x1000",
-      "-view",
-      "keyword",
-      "yes",
-      "-view",
-      "keyvalue",
-      "filter",
-      "-view",
-      "frame",
-      "no",
-      "-zscale",
-      "-lock",
-      "frame",
-      "image",
-      "-lock",
-      "scale",
-      "yes",
-      "-mosaicimage",
-      "iraf",
-      "/tmp/archive_download/*"
-    ]
-  }
-  else {
-    // open in non-mosaic modes
-    ds9Args = [
-      "-geometry",
-      "1000x1000",
-      "-view",
-      "keyword",
-      "yes",
-      "-view",
-      "keyvalue",
-      "filter",
-      "-view",
-      "frame",
-      "no",
-      "-zscale",
-      "-lock",
-      "frame",
-      "image",
-      "-lock",
-      "scale",
-      "yes",
-      "/tmp/archive_download/*"
-    ]
-  }
+  // read in command line args for DS9 based on
+  let argsObj = JSON.parse(fs.readFileSync(path.join('./', 'ds9_args.json')));
+  let ds9Args = (frameRecords[0].instrument_id.includes("fa") && frameRecords[0].reduction_level === 0) ? argsObj.mosaic : argsObj.nonMosaic
   const ds9Child = spawn("ds9", args=ds9Args, {env: {PATH: process.env.PATH}}, options={shell: true});
 
+  // clear out temp directory when user closes DS9
   ds9Child.on("exit", function() {
     const rmChild = spawn("rm", args=["-rf", DOWNLOAD_PATH], {env: {PATH: process.env.PATH}}, options={shell: true});
   })
