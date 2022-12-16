@@ -1,7 +1,7 @@
 {
-  "name": "archive-electron-ds9-uri",
+  "name": "archive-ds9-uri",
   "version": "0.1.0",
-  "description": "Archive UI wrapped in Electron to launch DS9",
+  "description": "Open Archive API frames in DS9.",
   "main": "index.js",
   "license": "GPLv3",
   "private": true,
