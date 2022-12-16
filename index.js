@@ -105,9 +105,14 @@ async function handleURL(url) {
     downloadCalls.push(downloadFile(record.url, destination));
   }
 
-  await Promise.all(downloadCalls);
+  // give the user some feedback when downloading images
+  let windowAbortController = new AbortController();
+  dialog.showMessageBox(BrowserWindow.getFocusedWindow(), {title: "Downloading", message: "Downloading images...", signal: windowAbortController.signal});
 
-  // read in command line args for DS9 based on
+  await Promise.all(downloadCalls);
+  windowAbortController.abort();
+
+  // read in command line args for DS9 based on frame metadata
   let argsObj = JSON.parse(fs.readFileSync(path.join('./', 'ds9_args.json')));
   let ds9Args = (frameRecords[0].instrument_id.includes("fa") && frameRecords[0].reduction_level === 0) ? argsObj.mosaic : argsObj.nonMosaic
   const ds9Child = spawn("ds9", args=ds9Args, {env: {PATH: process.env.PATH}}, options={shell: true});
