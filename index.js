@@ -99,13 +99,14 @@ async function getFrameRecord(frameUrl, token) {
   });
 }
 
-async function openDS9(frameRecords, temp_directory) {
+function openDS9(frameRecords, temp_directory) {
   printMessage("Opening in DS9!");
   // read in command line args for DS9 based on frame metadata
   let argsObj = JSON.parse(fs.readFileSync(path.join(app.getAppPath(), 'ds9_args.json')));
   let ds9Args = (frameRecords[0].instrument_id.includes("fa") && frameRecords[0].reduction_level === 0) ? argsObj.mosaic : argsObj.nonMosaic;
   ds9Args.push(path.join(temp_directory, '*'))
   // need to add /usr/local/bin to PATH to find ds9
+  // TODO: Make this user-configurable
   const ds9Child = spawn("ds9", args=ds9Args, {env: {PATH: process.env.PATH + ":/usr/local/bin"}}, options={shell: true});
 
   ds9Child.on("exit", async function(code) {
