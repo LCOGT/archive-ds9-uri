@@ -22,8 +22,7 @@
         "colorbar",
         "yes",
         "-mosaicimage",
-        "iraf",
-        "/tmp/archive_download/*"
+        "iraf"
       ],
     "nonMosaic": [
         "-geometry",
@@ -46,7 +45,6 @@
         "yes",
         "-lock",
         "colorbar",
-        "yes",
-        "/tmp/archive_download/*"
+        "yes"
       ]
 }

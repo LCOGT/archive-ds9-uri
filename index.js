@@ -1,12 +1,15 @@
-const { app, BrowserWindow, protocol, dialog } = require("electron");
+const { app, BrowserWindow, protocol, ipcMain } = require("electron");
 const  { URL } = require("url");
 const { spawn } = require("node:child_process");
 const https = require('https');
 const fs  = require("fs");
+const { rm } = require("node:fs/promises");
 const path = require("path");
+const os = require("os");
 
 const SCHEME = "archive+ds9";
-const DOWNLOAD_PATH = path.join('/tmp', 'archive_download');
+const TEMPDIR_PREFIX="archive-ds9-temp-"
+var WINDOW = null;
 
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
@@ -30,17 +33,17 @@ if (!gotTheLock) {
   })
 
   app.whenReady().then(() => {
-    createWindow()
+    window = createWindow();
 
     const lastArg = process.argv.at(-1)
     if (lastArg.startsWith(`{SCHEME}://`)) {
-      handleURL(lastArg)
+      handleURL(lastArg, WINDOW)
     }
   })
 
   app.on("open-url", (event, url) => {
     event.preventDefault()
-    handleURL(url)
+    handleURL(url, WINDOW)
   })
 }
 
@@ -50,21 +53,32 @@ app.on("window-all-closed", () => {
   }
 })
 
-const createWindow = () => {
-  const win = new BrowserWindow();
-
+createWindow = () => {
+  const win = new BrowserWindow({
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js')
+    }
+  });
   win.loadFile("index.html");
+  // assign to global-scope variable since we'll use this for log messages
+  WINDOW = win;
 }
 
-async function downloadFile(url, destination) {
+function printMessage(message) {
+  WINDOW.webContents.send('update-log', message);
+}
+
+async function downloadFile(frameRecord, destination) {
   return new Promise(function(resolve, reject) {
     const file = fs.createWriteStream(destination);
-    const request = https.get(url, function(response) {
+    const request = https.get(frameRecord.url, function(response) {
       response.pipe(file);
       file.on("finish", () => {
         file.close();
-        resolve();
+        resolve(frameRecord);
       });
+    }).on('error', (e) => {
+      reject(e);
     });
   });
 }
@@ -79,48 +93,65 @@ async function getFrameRecord(frameUrl, token) {
         var response = JSON.parse(data);
         resolve(response);
       });
+    }).on('error', (e) => {
+      reject(e);
     });
   });
 }
 
-async function handleURL(url) {
-  const u = new URL(url);
-
-  let urlParams = u.searchParams;
-  const mkdirChild = spawn("mkdir", args=[DOWNLOAD_PATH], {env: {PATH: process.env.PATH}}, options={shell: true});
-
-  // fetch archive frame records in parallel
-  let frameRecordCalls = [];
-  for (frame of urlParams.get("frame_ids").split(",")) {
-    frameUrl = urlParams.get("frame_url") + frame + "/";
-    frameRecordCalls.push(getFrameRecord(frameUrl, urlParams.get('token')));
-  }
-
-  let frameRecords = await Promise.all(frameRecordCalls);
-
-  // download files in parallel
-  let downloadCalls = [];
-  for (record of frameRecords) {
-    let destination = path.join(DOWNLOAD_PATH, record.filename);
-    downloadCalls.push(downloadFile(record.url, destination));
-  }
-
-  // give the user some feedback when downloading images
-  let windowAbortController = new AbortController();
-  dialog.showMessageBox(BrowserWindow.getFocusedWindow(), {title: "Downloading", message: "Downloading images...", signal: windowAbortController.signal});
-
-  await Promise.all(downloadCalls);
-  windowAbortController.abort();
-
+async function openDS9(frameRecords, temp_directory) {
+  printMessage("Opening in DS9!");
   // read in command line args for DS9 based on frame metadata
   let argsObj = JSON.parse(fs.readFileSync(path.join(app.getAppPath(), 'ds9_args.json')));
   let ds9Args = (frameRecords[0].instrument_id.includes("fa") && frameRecords[0].reduction_level === 0) ? argsObj.mosaic : argsObj.nonMosaic;
+  ds9Args.push(path.join(temp_directory, '*'))
   // need to add /usr/local/bin to PATH to find ds9
   const ds9Child = spawn("ds9", args=ds9Args, {env: {PATH: process.env.PATH + ":/usr/local/bin"}}, options={shell: true});
 
+  ds9Child.on("exit", async function(code) {
+    printMessage(`DS9 process exited with code ${code}. \n Temporary directory ${temp_directory} will now be purged.`);
+    await rm(temp_directory, {'force': true, 'recursive': true});
+  })
+  ds9Child.on("error", async function (error) {
+    await rm(temp_directory, {'force': true, 'recursive': true});
+    printMessage(`We've encountered an error opening DS9 \n\n ${error.stack} \n\n Temporary directory ${temp_directory} will now be purged.`);
+  })
+}
 
-  // clear out temp directory when user closes DS9
-  ds9Child.on("exit", function() {
-    const rmChild = spawn("rm", args=["-rf", DOWNLOAD_PATH], {env: {PATH: process.env.PATH}}, options={shell: true});
+function handleURL(url) {
+  fs.mkdtemp(path.join(os.tmpdir(), TEMPDIR_PREFIX), (err, directory) => {
+    if (err) {
+      printMessage(`Error during creation of temporary directory \n\n ${err}`);
+    }
+    else {
+      const u = new URL(url);
+      let urlParams = u.searchParams;
+
+      let frameRecordCalls = [];
+      for (frame of urlParams.get("frame_ids").split(",")) {
+        frameUrl = urlParams.get("frame_url") + frame + "/";
+        frameRecordCalls.push(getFrameRecord(frameUrl, urlParams.get('token')));
+      }
+    
+      // fetch all frame records in parallel
+      Promise.all(frameRecordCalls).then( 
+        (frameRecords) => {
+          let downloadCalls = [];
+          for (record of frameRecords) {
+            let destination = path.join(directory, record.filename);
+            downloadCalls.push(downloadFile(record, destination));
+          }
+          printMessage(`Downloading ${frameRecords.length} frames!`);
+          // now download all frames in parallel
+          Promise.all(downloadCalls).then(
+            (frameRecords) => {
+              openDS9(frameRecords, directory)
+            },
+            // if there were any errors, log them to the window
+            (reason) => {printMessage(reason)}
+          )
+        },
+        (reason) => {printMessage(reason)})
+    }
   })
 }
