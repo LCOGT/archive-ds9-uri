@@ -104,7 +104,7 @@ function openDS9(frameRecords, temp_directory) {
   // read in command line args for DS9 based on frame metadata
   let argsObj = JSON.parse(fs.readFileSync(path.join(app.getAppPath(), 'ds9_args.json')));
   let ds9Args = (frameRecords[0].instrument_id.includes("fa") && frameRecords[0].reduction_level === 0) ? argsObj.mosaic : argsObj.nonMosaic;
-  ds9Args.push(path.join(temp_directory, '*'))
+  ds9Args.push(path.join(temp_directory, '*'));
   // need to add /usr/local/bin to PATH to find ds9
   // TODO: Make this user-configurable
   const ds9Child = spawn("ds9", args=ds9Args, {env: {PATH: process.env.PATH + ":/usr/local/bin"}}, options={shell: true});
@@ -114,8 +114,8 @@ function openDS9(frameRecords, temp_directory) {
     await rm(temp_directory, {'force': true, 'recursive': true});
   })
   ds9Child.on("error", async function (error) {
-    await rm(temp_directory, {'force': true, 'recursive': true});
     printMessage(`We've encountered an error opening DS9 \n\n ${error.stack} \n\n Temporary directory ${temp_directory} will now be purged.`);
+    await rm(temp_directory, {'force': true, 'recursive': true});
   })
 }
 
@@ -146,7 +146,7 @@ function handleURL(url) {
           // now download all frames in parallel
           Promise.all(downloadCalls).then(
             (frameRecords) => {
-              openDS9(frameRecords, directory)
+              openDS9(frameRecords, directory);
             },
             // if there were any errors, log them to the window and clear out the tempdir
             async function(reason){
