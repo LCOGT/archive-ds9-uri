@@ -148,11 +148,17 @@ function handleURL(url) {
             (frameRecords) => {
               openDS9(frameRecords, directory)
             },
-            // if there were any errors, log them to the window
-            (reason) => {printMessage(reason)}
+            // if there were any errors, log them to the window and clear out the tempdir
+            async function(reason){
+              printMessage(reason);
+              await rm(temp_directory, {'force': true, 'recursive': true});
+            }
           )
         },
-        (reason) => {printMessage(reason)})
+        async function(reason){
+          printMessage(reason);
+          await rm(temp_directory, {'force': true, 'recursive': true});
+        })
     }
   })
 }
