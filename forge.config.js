@@ -2,8 +2,8 @@ module.exports = {
   packagerConfig: {
     protocols: [
       {
-        name: "lcods9",
-        schemes: ["lcods9"],
+        name: "archive+ds9",
+        schemes: ["archive+ds9"],
       },
     ]
   },
@@ -22,7 +22,7 @@ module.exports = {
       config: {
         options: {
           runtimeVersion: "22.08",
-          mimeType: ["x-scheme-handler/lcods9"],
+          mimeType: ["x-scheme-handler/archive+ds9"],
           modules: [
             {
               name: "zypak",
