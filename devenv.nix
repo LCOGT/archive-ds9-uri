@@ -8,6 +8,7 @@ let
     pkgs.flatpak-builder
     pkgs.elfutils
     pkgs.debugedit
+    pkgs.icu
   ];
 in {
   # https://devenv.sh/packages/

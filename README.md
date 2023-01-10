@@ -15,7 +15,7 @@ Download the `*.dmg` file and install it.
 Download the `*.flatpak` file and install it using:
 
 ```shell
-flatpak --user install *.flatpak 
+flatpak --user install *.flatpak
 ```
 
 ## Develop
