@@ -415,6 +415,7 @@ const FramesTable = ({ frames }: { frames: FrameState[] }) => {
           render: (record: FrameState) => {
             return frameIsMosiac(record) ? "True" : "False";
           },
+          sortable: (record) => frameIsMosiac(record),
         },
         {
           name: "File",
