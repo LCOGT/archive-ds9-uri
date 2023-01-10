@@ -1,0 +1,25 @@
+name: Lint
+on:
+  push:
+  pull_request:
+jobs:
+  lint:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
+    runs-on: ubuntu-latest
+    steps:
+      - name: Chekcout
+        uses: actions/checkout@v3
+      - name: Install Nix
+        uses: cachix/install-nix-action@v18
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+      - name: Install devenv
+        run: |
+          nix-env -iA cachix -f https://cachix.org/api/v1/install
+          cachix use devenv
+          nix-env -if https://github.com/cachix/devenv/tarball/v0.4
+      - name: Lint
+        run: |
+          eval "$(devenv print-dev-env)"
+          yarn
+          yarn lint
