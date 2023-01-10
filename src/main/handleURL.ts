@@ -461,9 +461,9 @@ const launchDs9 = async (
   const dp = DeferredPromise<number>();
   const frames = Object.values(launchTaskStore.get()[taskId].frames);
 
-  const anyMosaic = frames
+  const allMosaic = frames
     .map((f) => f.instrumentId?.includes("fa") && f.reductionLevel === 0)
-    .some((x) => !!x);
+    .every((x) => !!x);
 
   // If we're running in a Flatpak we have to wrap the call to DS9 with
   // 'flatpak-spawn --host' so that from DS9's POV it's still running on the
@@ -473,7 +473,7 @@ const launchDs9 = async (
       ? p.ds9.path
       : `flatpak-spawn --host ${p.ds9.path}`;
 
-  const baseArgs = anyMosaic ? p.ds9.mosaicArgs : p.ds9.args;
+  const baseArgs = allMosaic ? p.ds9.mosaicArgs : p.ds9.args;
 
   const args = [baseArgs, ...frames.map((f) => f.filepath)];
 

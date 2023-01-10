@@ -29,7 +29,7 @@ export const defaultPrefs = (): Preferences => {
     ds9: {
       path: os.tmpdir(),
       args: defaultDs9Args,
-      mosaicArgs: `${defaultDs9Args} -mosaic`,
+      mosaicArgs: `${defaultDs9Args} -mosaicimage iraf`,
     },
     customDownloadDir: {
       enabled: false,
