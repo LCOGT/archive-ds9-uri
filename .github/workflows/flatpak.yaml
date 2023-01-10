@@ -42,6 +42,7 @@ jobs:
           flatpak --user remotes -d
           yarn make --targets flatpak
       - name: Upload artifacts
+        if: github.event_name != 'release'
         uses: actions/upload-artifact@v3
         with:
           name: flatpak

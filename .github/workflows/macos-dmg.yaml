@@ -41,6 +41,7 @@ jobs:
           eval "$(devenv print-dev-env)"
           yarn make --targets dmg
       - name: Upload artifacts
+        if: github.event_name != 'release'
         uses: actions/upload-artifact@v3
         with:
           name: dmg
