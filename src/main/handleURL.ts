@@ -248,9 +248,7 @@ const downloadAllFrames = async (
     siblingAbortController.abort(signal.reason);
   });
 
-  const frames = Object.values(launchTaskStore.get()).flatMap((t) =>
-    Object.values(t.frames)
-  );
+  const frames = Object.values(launchTaskStore.get()[taskId].frames);
   const promises = frames.map(async (f) => {
     return await downloadFrame(
       downloadDir,
