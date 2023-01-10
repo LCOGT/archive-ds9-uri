@@ -5,13 +5,15 @@ on:
       - main
       - feature/*
       - feat/*
-    tags:
+    tags-ignore:
       - v*
   release:
     types:
       - published
 jobs:
   package:
+    # only run for releases with v* tags
+    if: github.event_name != 'release' || startsWith(github.event.release.tag_name, 'v')
     runs-on: ubuntu-latest
     steps:
       - name: Chekcout
