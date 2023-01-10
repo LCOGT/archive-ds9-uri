@@ -35,7 +35,7 @@ export const LaunchTaskList = () => {
   return <>{tasks}</>;
 };
 
-const frameIsMosiac = (f: FrameState) => {
+const frameIsMosaic = (f: FrameState) => {
   return f.instrumentId?.includes("fa") && f.reductionLevel === 0;
 };
 
@@ -62,7 +62,7 @@ export const LaunchTask = ({
 
   const frames = Object.values(state.frames);
 
-  const allMosaic = frames.map((f) => frameIsMosiac(f)).every((x) => !!x);
+  const allMosaic = frames.map((f) => frameIsMosaic(f)).every((x) => !!x);
 
   let progressBar;
   let statusStat;
@@ -226,7 +226,7 @@ export const LaunchTask = ({
           <EuiFlexItem>
             <EuiStat
               titleSize="xxs"
-              description="All Mosiac"
+              description="All Mosaic"
               title={allMosaic ? "True" : "False"}
             />
           </EuiFlexItem>
@@ -413,9 +413,9 @@ const FramesTable = ({ frames }: { frames: FrameState[] }) => {
           name: "Mosaic",
           dataType: "boolean",
           render: (record: FrameState) => {
-            return frameIsMosiac(record) ? "True" : "False";
+            return frameIsMosaic(record) ? "True" : "False";
           },
-          sortable: (record) => frameIsMosiac(record),
+          sortable: (record) => frameIsMosaic(record),
         },
         {
           name: "File",

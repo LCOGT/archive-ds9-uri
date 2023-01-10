@@ -33,7 +33,7 @@ export const Preferences = ({ onClose }: PreferncesProps) => {
   const [apiToken, setApiToken] = useState(prefs.token);
   const [ds9Path, setDs9Path] = useState(prefs.ds9.path);
   const [ds9Args, setDs9Args] = useState(prefs.ds9.args);
-  const [ds9MosaicArgs, setDs9MosiacArgs] = useState(prefs.ds9.mosaicArgs);
+  const [ds9MosaicArgs, setDs9MosaicArgs] = useState(prefs.ds9.mosaicArgs);
   const [customDownloadDirEnable, setCustomDownloadDirEnable] = useState(
     prefs.customDownloadDir.enabled
   );
@@ -167,7 +167,7 @@ export const Preferences = ({ onClose }: PreferncesProps) => {
               <EuiFormRow label="Mosaic CLI Arguments">
                 <EuiFieldText
                   value={ds9MosaicArgs}
-                  onChange={(e) => setDs9MosiacArgs(e.target.value)}
+                  onChange={(e) => setDs9MosaicArgs(e.target.value)}
                 ></EuiFieldText>
               </EuiFormRow>
             </EuiPanel>
