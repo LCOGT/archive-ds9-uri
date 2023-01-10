@@ -8,9 +8,9 @@
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
-    "tlint": "tsc --noemit",
+    "tslint": "tsc --noemit",
     "elint": "eslint --ext .ts,.tsx .",
-    "lint": "yarn tlint && yarn elint",
+    "lint": "yarn tslint && yarn elint",
     "fmt": "prettier --write ."
   },
   "keywords": [],
