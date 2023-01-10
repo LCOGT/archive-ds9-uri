@@ -5,6 +5,8 @@ on:
       - main
       - feature/*
       - feat/*
+    tags:
+      - v*
   release:
     types:
       - published
@@ -23,11 +25,19 @@ jobs:
           nix-env -iA cachix -f https://cachix.org/api/v1/install
           cachix use devenv
           nix-env -if https://github.com/cachix/devenv/tarball/v0.4
+      - name: Yarn init
+        run: |
+          eval "$(devenv print-dev-env)"
+          yarn
+      - name: Set tag as app version
+        if: github.event_name == 'release'
+        run: |
+          eval "$(devenv print-dev-env)"
+          yarn version --no-git-tag-version --new-version "${{ github.event.release.tag_name }}"
       - name: Build Flatpak
         run: |
           eval "$(devenv print-dev-env)"
           flatpak --user remotes -d
-          yarn
           yarn make --targets '@electron-forge/maker-flatpak'
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
