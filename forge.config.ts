@@ -7,6 +7,7 @@ import { mainConfig } from "./webpack.main.config";
 import { rendererConfig } from "./webpack.renderer.config";
 import { SCHEME } from "./src/common/scheme";
 
+
 const config: ForgeConfig = {
   packagerConfig: {
     protocols: [
@@ -22,6 +23,7 @@ const config: ForgeConfig = {
     new MakerFlatpak({
       options: {
         files: [],
+        branch: process.env.npm_package_version || "master",
         base: "org.electronjs.Electron2.BaseApp",
         baseVersion: "22.08",
         runtime: "org.freedesktop.Platform",

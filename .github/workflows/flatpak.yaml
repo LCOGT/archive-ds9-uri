@@ -40,7 +40,7 @@ jobs:
         run: |
           eval "$(devenv print-dev-env)"
           flatpak --user remotes -d
-          yarn make --targets '@electron-forge/maker-flatpak'
+          yarn make --targets flatpak
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:

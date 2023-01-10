@@ -39,7 +39,7 @@ jobs:
       - name: Build DMG
         run: |
           eval "$(devenv print-dev-env)"
-          yarn make --targets '@electron-forge/maker-dmg'
+          yarn make --targets dmg
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
