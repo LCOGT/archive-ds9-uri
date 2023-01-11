@@ -19,19 +19,6 @@ const tasksById = new Map<string, ReturnType<typeof LaunchTask>>();
 export const readyToHandle = DeferredPromise<void>();
 
 export const handleURL = (url: string): void => {
-  // Exit early if DS9 path is not set. DS9 path has probably not been selected
-  // yet, so notify the user.
-  const prefs = getPreferences();
-
-  if (!prefs.ds9.path) {
-    sendToast({
-      color: "danger",
-      title: "Preferences",
-      text: "Set a valid path to the DS9 executable before proceeding.",
-    });
-    return;
-  }
-
   // validate the url
   const res = parseUrl(url);
 
@@ -171,6 +158,18 @@ const LaunchTask = (url: ParsedUrl) => {
       launchTaskStore.set((s) => {
         s[id].cleanup = "Skip";
       });
+    }
+
+    // Exit early if DS9 path is not set. DS9 path has probably not been selected
+    // yet, so notify the user.
+    if (!prefs.ds9.path) {
+      sendToast({
+        color: "danger",
+        title: "Preferences",
+        text: "Set a valid path to the DS9 executable.",
+      });
+
+      throw new Error("DS9 executable path not set");
     }
 
     // make sure download directory exists
