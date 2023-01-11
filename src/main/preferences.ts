@@ -1,4 +1,3 @@
-import os from "node:os";
 import { BrowserWindow } from "electron";
 import { Preferences, preferencesWithGVK } from "../common/preferences";
 
@@ -27,7 +26,7 @@ export const defaultPrefs = (): Preferences => {
   return preferencesWithGVK({
     token: "change-me",
     ds9: {
-      path: os.tmpdir(),
+      path: "",
       args: defaultDs9Args,
       mosaicArgs: `${defaultDs9Args} -mosaicimage iraf`,
     },

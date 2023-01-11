@@ -73,6 +73,7 @@ export const PreferencesProvider = ({ children }: PreferencesProviderProps) => {
           window.main.readyToHandle();
         }
       }
+
       const p = await window.main.prefs.get();
       setPrefsInternal(p);
 
@@ -91,6 +92,8 @@ export const PreferencesProvider = ({ children }: PreferencesProviderProps) => {
           </>
         ),
       });
+
+      window.main.readyToHandle();
     })();
   }, []);
 
