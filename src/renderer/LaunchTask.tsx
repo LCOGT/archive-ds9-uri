@@ -107,7 +107,9 @@ export const LaunchTask = ({
     case "Failed":
     case "Aborted": {
       progressBar = <ProgressBar color="danger" percent={100} />;
-      statusStat = <StatusStat description={state.status} color="danger" title="--"  />;
+      statusStat = (
+        <StatusStat description={state.status} color="danger" title="--" />
+      );
       break;
     }
     default: {
@@ -137,7 +139,11 @@ export const LaunchTask = ({
 
   let abortOrDeleteButton;
 
-  if (state.status == "Aborted" || state.status == "Done" || state.status == "Failed") {
+  if (
+    state.status == "Aborted" ||
+    state.status == "Done" ||
+    state.status == "Failed"
+  ) {
     abortOrDeleteButton = (
       <EuiToolTip content="Delete">
         <EuiButtonIcon

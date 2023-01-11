@@ -215,7 +215,6 @@ const LaunchTask = (url: ParsedUrl) => {
       // Schedule self-deleting state after 30s to avoid filling up all memory
       // with done tasks.
       setTimeout(() => deleteTask(id), 30000);
-
     } catch (err) {
       if (err instanceof Error) {
         launchTaskStore.set((s) => {

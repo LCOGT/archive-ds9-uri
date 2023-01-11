@@ -1,7 +1,6 @@
 import { BrowserWindow } from "electron";
 import { produceWithPatches, Draft, Patch } from "immer";
 
-
 export interface LaunchTaskState {
   id: string;
   url: string;
