@@ -104,6 +104,12 @@ export const LaunchTask = ({
       statusStat = <StatusStat description={state.status} color="success" />;
       break;
     }
+    case "Failed":
+    case "Aborted": {
+      progressBar = <ProgressBar color="danger" percent={100} />;
+      statusStat = <StatusStat description={state.status} color="danger" title="--"  />;
+      break;
+    }
     default: {
       progressBar = <></>;
       statusStat = (
@@ -316,7 +322,7 @@ const ProgressBar = ({
   color = "success",
 }: {
   percent?: undefined | number;
-  color?: "success" | "warning";
+  color?: "success" | "warning" | "danger";
 }) => {
   return (
     <EuiProgress
