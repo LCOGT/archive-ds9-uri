@@ -152,8 +152,9 @@ const LaunchTask = (url: ParsedUrl) => {
     launchTaskStore.set((s) => {
       s[id] = {
         id,
-        sanitizedUrl: sanitizieUrl(url.raw).href,
         url: url.raw.href,
+        sanitizedUrl: sanitizieUrl(url.raw).href,
+        createdAt: Date.now(),
         status: "Initializing",
         frames: {},
         stdout: [],

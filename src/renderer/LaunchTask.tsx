@@ -29,7 +29,7 @@ export const LaunchTaskList = () => {
   const { launchTasks } = useLaunchTasks();
 
   const tasks = Object.values(launchTasks)
-    .reverse()
+    .sort((a, b) => b.createdAt - a.createdAt)
     .map((t, i) => <LaunchTask key={t.id} state={t} initialIsOpen={i === 0} />);
 
   return <>{tasks}</>;
@@ -131,7 +131,7 @@ export const LaunchTask = ({
 
   let abortOrDeleteButton;
 
-  if (state.status == "Aborted" || state.status == "Done") {
+  if (state.status == "Aborted" || state.status == "Done" || state.status == "Failed") {
     abortOrDeleteButton = (
       <EuiToolTip content="Delete">
         <EuiButtonIcon
