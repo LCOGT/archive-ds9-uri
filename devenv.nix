@@ -8,6 +8,7 @@ let
     pkgs.flatpak-builder
     pkgs.elfutils
     pkgs.debugedit
+    pkgs.icu
   ];
 in {
   # https://devenv.sh/packages/
@@ -22,5 +23,27 @@ in {
       flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
     '' else ""}
   '';
+
+  pre-commit.hooks = {
+    lint = {
+      enable = true;
+      name = "Lint";
+      entry = "yarn lint";
+      pass_filenames = false;
+      raw = {
+        verbose = true;
+      };
+    };
+
+    fmt = {
+      enable = true;
+      name = "Format";
+      entry = "yarn fmt";
+      pass_filenames = false;
+      raw = {
+        verbose = true;
+      };
+    };
+  };
 
 }

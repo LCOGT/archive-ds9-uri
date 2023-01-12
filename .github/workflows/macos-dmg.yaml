@@ -4,11 +4,16 @@ on:
     branches:
       - main
       - feature/*
+      - feat/*
+    tags-ignore:
+      - v*
   release:
     types:
       - published
 jobs:
   package:
+    # only run for releases with v* tags
+    if: github.event_name != 'release' || startsWith(github.event.release.tag_name, 'v')
     runs-on: macos-latest
     steps:
       - name: Chekcout
@@ -22,12 +27,21 @@ jobs:
           nix-env -iA cachix -f https://cachix.org/api/v1/install
           cachix use devenv
           nix-env -if https://github.com/cachix/devenv/tarball/v0.4
-      - name: Build DMG
+      - name: Yarn init
         run: |
           eval "$(devenv print-dev-env)"
           yarn
-          yarn make --targets '@electron-forge/maker-dmg'
+      - name: Set tag as app version
+        if: github.event_name == 'release'
+        run: |
+          eval "$(devenv print-dev-env)"
+          yarn version --no-git-tag-version --new-version "${{ github.event.release.tag_name }}"
+      - name: Build DMG
+        run: |
+          eval "$(devenv print-dev-env)"
+          yarn make --targets dmg
       - name: Upload artifacts
+        if: github.event_name != 'release'
         uses: actions/upload-artifact@v3
         with:
           name: dmg
