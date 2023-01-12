@@ -41,5 +41,5 @@ yarn make
 Install application using built `flatpak` (on Linux):
 
 ```shell
-flatpak --user install out/make/flatpak/x86_64/io.atom.electron.archive-electron-ds9-uri_stable_x86_64.flatpak
+flatpak --user install out/make/flatpak/x86_64/*.flatpak
 ```
