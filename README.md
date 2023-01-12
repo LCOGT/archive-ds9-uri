@@ -15,6 +15,7 @@ Download the `*.dmg` file and install it.
 Download the `*.flatpak` file and install it using:
 
 ```shell
+flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 flatpak --user install *.flatpak
 ```
 
