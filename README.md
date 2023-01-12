@@ -33,6 +33,13 @@ Run the app in dev mode:
 yarn start
 ```
 
+In development mode any changes to files in `src/renderer/*` automatically propogate out.
+
+Changes to the Main process (`src/main/*`) requires a manual restart of the Node process.
+If you type `rs` + `Enter` in the terminal running `yarn start`, it should restart faster
+than exiting the process and restarting it manually.
+
+
 Build distribution artifacts (via `electron-forge`):
 
 ```shell
