@@ -536,7 +536,11 @@ const launchDs9 = async (
   });
 
   ds9.on("close", (code) => {
-    dp.resolve(code);
+    if (code === 0) {
+      dp.resolve(code);
+    } else {
+      dp.reject(new Error(`Command returned non-zero exit code: ${code}`));
+    }
   });
 
   return await dp.promise;
