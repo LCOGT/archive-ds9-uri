@@ -2,3 +2,4 @@
 out/
 dist/
 .devenv*
+.pre-commit-config.yaml

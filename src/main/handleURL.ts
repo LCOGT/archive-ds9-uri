@@ -5,16 +5,21 @@ import { spawn } from "node:child_process";
 import fetch from "node-fetch";
 import dedent from "dedent-js";
 import { v4 as uuidv4 } from "uuid";
+import { URL } from "whatwg-url";
+import pLimit from "p-limit";
+import pThrottle from "p-throttle";
+import type { Preferences } from "../common/preferences";
+import { DeferredPromise } from "../common/deferredPromise";
 import { sendToast } from "./toast";
 import { parseUrl, ParsedUrl } from "./parseUrl";
 import { launchTaskStore } from "./launchTaskStore";
 import { getPreferences } from "./preferences";
 import { Result } from "../common/result";
-import { URL } from "whatwg-url";
-import type { Preferences } from "../common/preferences";
-import { DeferredPromise } from "../common/deferredPromise";
 
 const tasksById = new Map<string, ReturnType<typeof LaunchTask>>();
+
+// maximum number of files to download in parallel
+const pDownloadLimiter = pLimit(10);
 
 export const readyToHandle = DeferredPromise<void>();
 
@@ -266,17 +271,19 @@ const downloadAllFrames = async (
   });
 
   const frames = Object.values(launchTaskStore.get()[taskId].frames);
-  const promises = frames.map(async (f) => {
-    return await downloadFrame(
-      downloadDir,
-      taskId,
-      f.id,
-      siblingAbortController.signal
-    ).catch((err) => {
-      siblingAbortController.abort();
-      throw err;
-    });
-  });
+  const promises = frames.map((f) =>
+    pDownloadLimiter(() =>
+      downloadFrame(
+        downloadDir,
+        taskId,
+        f.id,
+        siblingAbortController.signal
+      ).catch((err) => {
+        siblingAbortController.abort();
+        throw err;
+      })
+    )
+  );
 
   await Promise.all(promises);
 };
@@ -333,8 +340,8 @@ const updateAllFramesMetadata = async (
     siblingAbortController.abort(signal.reason);
   });
 
-  const promises = url.frameIds.map(async (frameId) => {
-    return await updateFrameMetadata(
+  const promises = url.frameIds.map((frameId) =>
+    updateFrameMetadata(
       url,
       taskId,
       frameId,
@@ -342,80 +349,84 @@ const updateAllFramesMetadata = async (
     ).catch((err) => {
       siblingAbortController.abort();
       throw err;
-    });
-  });
-
-  await Promise.allSettled(promises);
-};
-
-const updateFrameMetadata = async (
-  url: ParsedUrl,
-  taskId: string,
-  frameId: string,
-  signal: AbortSignal
-) => {
-  launchTaskStore.set((s) => {
-    s[taskId].frames[frameId] = {
-      id: frameId,
-      status: "Initializing",
-    };
-  });
-
-  const reqUrl = new URL(`${frameId}`, url.frameUrl);
-
-  const resp = await fetch(reqUrl.href, {
-    headers: {
-      authorization: `Token ${url.token}`,
-      "content-type": "application/json",
-    },
-    signal,
-  });
-
-  if (!resp.ok) {
-    throw new Error(`Failed to fetch metadata from ${reqUrl}`);
-  }
-
-  interface MetadataResp {
-    filename: string;
-    url: string;
-    instrument_id: string;
-    reduction_level: number;
-  }
-
-  const json = (await resp.json()) as MetadataResp;
-
-  // Can't make HTTP HEAD requests to the S3 pre-signed URL to get the file size.
-  // So fake it using a Range request.
-  // TODO: add the ability to do HEAD requests to archive-api to avoid this hack
-  const fileResp = await fetch(json.url, {
-    headers: {
-      range: "bytes=0-0",
-    },
-    signal,
-  });
-  if (!fileResp.ok) {
-    throw new Error(`Failed to make range request to ${json.url}`);
-  }
-
-  const totalBytes = Number(
-    fileResp.headers
-      .get("content-range")
-      ?.split("/")
-      .filter((x) => x)
-      .at(-1)
+    })
   );
 
-  launchTaskStore.set((s) => {
-    const f = s[taskId].frames[frameId];
-    f.status = "Pending";
-    f.filename = json.filename;
-    f.downloadUrl = json.url;
-    f.totalBytes = totalBytes;
-    f.downloadedBytes = 0;
-    f.instrumentId = json.instrument_id;
-    f.reductionLevel = json.reduction_level;
-  });
+  await Promise.all(promises);
 };
+
+// throttle API requests to 10 every 200 ms to avoid getting blocked
+const updateFrameMetadata = pThrottle({ limit: 10, interval: 200 })(
+  async (
+    url: ParsedUrl,
+    taskId: string,
+    frameId: string,
+    signal: AbortSignal
+  ) => {
+    launchTaskStore.set((s) => {
+      s[taskId].frames[frameId] = {
+        id: frameId,
+        status: "Initializing",
+      };
+    });
+
+    const reqUrl = new URL(`${frameId}`, url.frameUrl);
+
+    const resp = await fetch(reqUrl.href, {
+      headers: {
+        authorization: `Token ${url.token}`,
+        "content-type": "application/json",
+      },
+      signal,
+    });
+
+    if (!resp.ok) {
+      throw new Error(`Failed to fetch metadata from ${reqUrl}`);
+    }
+
+    interface MetadataResp {
+      filename: string;
+      url: string;
+      instrument_id: string;
+      reduction_level: number;
+    }
+
+    const json = (await resp.json()) as MetadataResp;
+
+    // Can't make HTTP HEAD requests to the S3 pre-signed URL to get the file size.
+    // So fake it using a Range request.
+    // TODO: add the ability to do HEAD requests to archive-api to avoid this hack
+    const fileResp = await fetch(json.url, {
+      headers: {
+        range: "bytes=0-0",
+      },
+      signal,
+    });
+
+    if (!fileResp.ok) {
+      throw new Error(`Failed to make range request to ${json.url}`);
+    }
+
+    const totalBytes = Number(
+      fileResp.headers
+        .get("content-range")
+        ?.split("/")
+        .filter((x) => x)
+        .at(-1)
+    );
+
+    launchTaskStore.set((s) => {
+      const f = s[taskId].frames[frameId];
+      f.status = "Pending";
+      f.filename = json.filename;
+      f.downloadUrl = json.url;
+      f.totalBytes = totalBytes;
+      f.downloadedBytes = 0;
+      f.instrumentId = json.instrument_id;
+      f.reductionLevel = json.reduction_level;
+    });
+  }
+);
 
 const ensureDownloadDir = async (
   p: Preferences,

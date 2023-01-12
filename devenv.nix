@@ -24,4 +24,26 @@ in {
     '' else ""}
   '';
 
+  pre-commit.hooks = {
+    lint = {
+      enable = true;
+      name = "Lint";
+      entry = "yarn lint";
+      pass_filenames = false;
+      raw = {
+        verbose = true;
+      };
+    };
+
+    fmt = {
+      enable = true;
+      name = "Format";
+      entry = "yarn fmt";
+      pass_filenames = false;
+      raw = {
+        verbose = true;
+      };
+    };
+  };
+
 }
