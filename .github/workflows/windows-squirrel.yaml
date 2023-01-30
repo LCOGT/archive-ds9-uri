@@ -36,6 +36,11 @@ jobs:
         run: |
           eval "$(devenv print-dev-env)"
           yarn version --no-git-tag-version --new-version "${{ github.event.release.tag_name }}"
+      - name: Set git rev as app version
+        if: github.event_name != 'release'
+        run: |
+          eval "$(devenv print-dev-env)"
+          yarn version --no-git-tag-version --new-version "0.0.0-git.$(git rev-parse --short HEAD)"
       - name: Build Squirrel Installer
         run: |
           eval "$(devenv print-dev-env)"
