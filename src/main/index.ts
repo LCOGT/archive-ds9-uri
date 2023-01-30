@@ -14,7 +14,7 @@ import {
   dialog,
   OpenDialogOptions,
   OpenDialogReturnValue,
-} from "electron";
+} from "electron"; // eslint-disable-line import/no-duplicates
 import contextMenu from "electron-context-menu";
 import path from "node:path";
 import { SCHEME } from "../common/scheme";
