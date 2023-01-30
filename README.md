@@ -26,11 +26,15 @@ Pre-built packages are attached to every [Release](https://github.com/LCOGT/arch
 
 ### macOS
 
-Download the `*.dmg` file and install it.
+Download the `.dmg` file and install it.
 
 ### Linux
 
-Download the `*.flatpak` file and install it using:
+Download the `.flatpak` file and install it using:
+
+### Windows
+
+Download the `Setup.exe` file and install it.
 
 ```shell
 flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
@@ -67,4 +71,12 @@ Install application using built `flatpak` (on Linux):
 
 ```shell
 flatpak --user install out/make/flatpak/x86_64/*.flatpak
+```
+
+### Windows (on Linux via Wine)
+
+To build distribution artifacts for Windows, use:
+
+```shell
+yarn make -p win32 -a x64
 ```

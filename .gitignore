@@ -1,3 +1,6 @@
+# wine prefix
+.wine/
+
 # pre-commit-hooks.nix
 .pre-commit-config.yaml
 

@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 import { URL } from "whatwg-url";
 import pLimit from "p-limit";
 import pThrottle from "p-throttle";
+import shelx from "shlex";
 import type { Preferences } from "../common/preferences";
 import { DeferredPromise } from "../common/deferredPromise";
 import { sendToast } from "./toast";
@@ -491,22 +492,24 @@ const launchDs9 = async (
     .map((f) => f.instrumentId?.includes("fa") && f.reductionLevel === 0)
     .every((x) => !!x);
 
+  const ds9Args = allMosaic ? p.ds9.mosaicArgs : p.ds9.args;
+
+  const args = [...shelx.split(ds9Args), ...frames.map((f) => f.filepath)];
+
+  let command = p.ds9.path;
+
   // If we're running in a Flatpak we have to wrap the call to DS9 with
   // 'flatpak-spawn --host' so that from DS9's POV it's still running on the
   // Host with all of the Host shared libraries that it needs.
-  const command =
-    process.env.FLATPAK_ID === undefined
-      ? p.ds9.path
-      : `flatpak-spawn --host ${p.ds9.path}`;
-
-  const baseArgs = allMosaic ? p.ds9.mosaicArgs : p.ds9.args;
-
-  const args = [baseArgs, ...frames.map((f) => f.filepath)];
+  if (process.env.FLATPAK_ID !== undefined) {
+    args.unshift("--host", command);
+    command = "flatpak-spawn";
+  }
 
   const ds9 = spawn(command, args, {
     signal,
     windowsHide: true,
-    shell: true,
+    shell: false,
   });
 
   launchTaskStore.set((s) => {
