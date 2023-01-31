@@ -32,6 +32,11 @@ Download the `.dmg` file and install it.
 
 Download the `.flatpak` file and install it using:
 
+```shell
+flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+flatpak --user install *.flatpak
+```
+
 ### Windows
 
 Download the `Setup.exe` file and install it.
@@ -39,11 +44,6 @@ Download the `Setup.exe` file and install it.
 **Note:** If you're having problems launching DS9, try installing the latest
 version of DS9 from https://sites.google.com/cfa.harvard.edu/saoimageds9/download.
 `8.4.1` is known to work.
-
-```shell
-flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-flatpak --user install *.flatpak
-```
 
 ## Develop
 
