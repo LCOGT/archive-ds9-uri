@@ -1,6 +1,7 @@
 import type { ForgeConfig } from "@electron-forge/shared-types";
 import { MakerDMG } from "@electron-forge/maker-dmg";
 import { MakerFlatpak } from "@electron-forge/maker-flatpak";
+import { MakerSquirrel } from "@electron-forge/maker-squirrel";
 import { WebpackPlugin } from "@electron-forge/plugin-webpack";
 
 import { mainConfig } from "./webpack.main.config";
@@ -19,6 +20,7 @@ const config: ForgeConfig = {
   rebuildConfig: {},
   makers: [
     new MakerDMG({}),
+    new MakerSquirrel({}),
     new MakerFlatpak({
       options: {
         files: [],

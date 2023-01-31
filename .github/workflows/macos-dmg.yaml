@@ -26,7 +26,7 @@ jobs:
         run: |
           nix-env -iA cachix -f https://cachix.org/api/v1/install
           cachix use devenv
-          nix-env -if https://github.com/cachix/devenv/tarball/v0.4
+          nix-env -if https://github.com/cachix/devenv/tarball/v0.5
       - name: Yarn init
         run: |
           eval "$(devenv print-dev-env)"
@@ -36,6 +36,11 @@ jobs:
         run: |
           eval "$(devenv print-dev-env)"
           yarn version --no-git-tag-version --new-version "${{ github.event.release.tag_name }}"
+      - name: Set git rev as app version
+        if: github.event_name != 'release'
+        run: |
+          eval "$(devenv print-dev-env)"
+          yarn version --no-git-tag-version --new-version "0.0.0-git.$(git rev-parse --short HEAD)"
       - name: Build DMG
         run: |
           eval "$(devenv print-dev-env)"

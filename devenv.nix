@@ -8,7 +8,10 @@ let
     pkgs.flatpak-builder
     pkgs.elfutils
     pkgs.debugedit
-    pkgs.icu
+
+    # needed for Windows build on Linux
+    pkgs.mono
+    pkgs.wineWowPackages.staging
   ];
 in {
   # https://devenv.sh/packages/
@@ -20,6 +23,12 @@ in {
 
   enterShell = ''
     ${if pkgs.stdenv.isLinux then ''
+      # Wine env vars
+      export WINEPREFIX=$DEVENV_ROOT/.wine
+
+      # Disables prompts (I think)
+      export WINEDLLOVERRIDES="mscoree,mshtml="
+
       flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
     '' else ""}
   '';
@@ -32,6 +41,7 @@ in {
       pass_filenames = false;
       raw = {
         verbose = true;
+        fail_fast = true;
       };
     };
 

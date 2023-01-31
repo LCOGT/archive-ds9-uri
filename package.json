@@ -11,7 +11,7 @@
     "tslint": "tsc --noemit",
     "elint": "eslint --ext .ts,.tsx .",
     "lint": "yarn tslint && yarn elint",
-    "fmt": "prettier --write ."
+    "fmt": "prettier --write . '!./.wine'"
   },
   "keywords": [],
   "author": {
@@ -39,6 +39,7 @@
     "css-loader": "^6.0.0",
     "electron": "22.0.0",
     "electron-devtools-installer": "^3.2.0",
+    "electron-winstaller": "^5.1.0",
     "eslint": "^8.31.0",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-import": "^2.25.0",
@@ -67,6 +68,7 @@
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "shlex": "^2.1.2",
     "use-local-storage-state": "^18.1.2",
     "uuid": "^9.0.0",
     "whatwg-url": "^11.0.0"

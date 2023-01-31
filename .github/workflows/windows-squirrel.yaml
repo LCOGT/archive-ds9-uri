@@ -1,4 +1,4 @@
-name: flatpack
+name: windows-squirrel
 on:
   push:
     branches:
@@ -41,19 +41,18 @@ jobs:
         run: |
           eval "$(devenv print-dev-env)"
           yarn version --no-git-tag-version --new-version "0.0.0-git.$(git rev-parse --short HEAD)"
-      - name: Build Flatpak
+      - name: Build Squirrel Installer
         run: |
           eval "$(devenv print-dev-env)"
-          flatpak --user remotes -d
-          yarn make --targets flatpak
+          yarn make -p win32 -a x64
       - name: Upload artifacts
         if: github.event_name != 'release'
         uses: actions/upload-artifact@v3
         with:
-          name: flatpak
-          path: ./out/make/flatpak/*/*.flatpak
-      - name: Add flatpack to release
+          name: windows-squirrel
+          path: ./out/make/squirrel.windows/*/*.exe
+      - name: Add to release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v1
         with:
-          files: ./out/make/flatpak/*/*.flatpak
+          files: ./out/make/squirrel.windows/*/*.exe

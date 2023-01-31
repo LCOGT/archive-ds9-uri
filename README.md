@@ -26,16 +26,24 @@ Pre-built packages are attached to every [Release](https://github.com/LCOGT/arch
 
 ### macOS
 
-Download the `*.dmg` file and install it.
+Download the `.dmg` file and install it.
 
 ### Linux
 
-Download the `*.flatpak` file and install it using:
+Download the `.flatpak` file and install it using:
 
 ```shell
 flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 flatpak --user install *.flatpak
 ```
+
+### Windows
+
+Download the `Setup.exe` file and install it.
+
+**Note:** If you're having problems launching DS9, try installing the latest
+version of DS9 from https://sites.google.com/cfa.harvard.edu/saoimageds9/download.
+`8.4.1` is known to work.
 
 ## Develop
 
@@ -67,4 +75,12 @@ Install application using built `flatpak` (on Linux):
 
 ```shell
 flatpak --user install out/make/flatpak/x86_64/*.flatpak
+```
+
+### Windows (on Linux via Wine)
+
+To build distribution artifacts for Windows, use:
+
+```shell
+yarn make -p win32 -a x64
 ```
