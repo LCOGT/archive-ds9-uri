@@ -39,7 +39,7 @@ const config: ForgeConfig = {
     new MakerFlatpak({
       options: {
         files: [],
-        branch: process.env.npm_package_version || "master",
+        branch: "stable",
         base: "org.electronjs.Electron2.BaseApp",
         baseVersion: "22.08",
         runtime: "org.freedesktop.Platform",
