@@ -8,6 +8,10 @@ import { mainConfig } from "./webpack.main.config";
 import { rendererConfig } from "./webpack.renderer.config";
 import { SCHEME } from "./src/common/scheme";
 
+const stripSemverPrefix = (s: string | undefined) => {
+  return s?.replace(/^(v)/, "");
+};
+
 const config: ForgeConfig = {
   packagerConfig: {
     protocols: [
@@ -16,8 +20,19 @@ const config: ForgeConfig = {
         schemes: [SCHEME],
       },
     ],
+    // Squirrel/NuGet/rcedit doesn't like the "v" prefeix for semvers, so remove it
+    appVersion:
+      stripSemverPrefix(process.env.npm_package_version) || "0.0.0-unknown",
   },
   rebuildConfig: {},
+  hooks: {
+    readPackageJson: async (_, packageJson) => {
+      // Strip the "v" prefix again for the makers.
+      packageJson.version =
+        stripSemverPrefix(packageJson.version) || "0.0.0-unknown";
+      return packageJson;
+    },
+  },
   makers: [
     new MakerDMG({}),
     new MakerSquirrel({}),
