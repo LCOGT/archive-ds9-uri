@@ -28,6 +28,8 @@ Pre-built packages are attached to every [Release](https://github.com/LCOGT/arch
 
 Download the `.dmg` file and install it.
 
+You might have to add an exception to get it to open https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unidentified-developer-mh40616/mac
+
 ### Linux
 
 Download the `.flatpak` file and install it using:
