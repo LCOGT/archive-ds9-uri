@@ -26,29 +26,18 @@ Pre-built packages are attached to every [Release](https://github.com/LCOGT/arch
 
 ### macOS
 
-#### NOTE: The DS9 installer for MacOS does not add the ds9 command-line executable to a standard path like /usr/local/bin. To get around that:
-
-1. Add the following to a blank file, `ds9`
-
-```
-#!/bin/bash
-/Applications/SAOImageDS9.app/Contents/MacOS/ds9 $@
-```
-2. Make the file executable: 
-```
-chmod +x ds9
-```
-3. Copy this file to `/usr/local/bin`
-```
-cp ds9 /usr/local/bin
-```
-4. Typing `ds9` into a new terminal window should now open up the GUI
-
-#### Installation:
-
 Download the `.dmg` file and install it.
 
 You might have to add an exception to get it to open https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unidentified-developer-mh40616/mac
+
+#### NOTE: The DS9 installer for MacOS does not add the ds9 command-line executable to a standard path like /usr/local/bin. To get around that, please configure the archive-ds9-uri to use the ds9 executable located inside of the application package:
+
+1. Launch archive-ds9-uri
+2. Navigate to the preferences pane
+3. Under Preferences->DS9->Executable, click the folder to update the location of your DS9 executable. A finder window will open
+4. Type Command+Shift+g, a dialog should appear allowing you to navigate by path
+5. Navigate to /Applications/SAOImageDS9.app/Contents/MacOS. Hit enter. (Note for different versions of DS9 this path may be slightly different)
+6. A window with a single file, named ds9 should appear. Double-click the file to set it as your default ds9 executable.
 
 ### Linux
 
