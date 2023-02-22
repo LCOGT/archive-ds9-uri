@@ -80,13 +80,6 @@ if (!gotTheLock) {
   app.whenReady().then(() => {
     const window = createWindow();
 
-    // This only works on MacOS.
-    app.on("open-url", (event, url) => {
-      event.preventDefault();
-      window.focus();
-      handleURL(url);
-    });
-
     app.on("second-instance", (_, args) => {
       if (window.isMinimized()) {
         window.restore();
@@ -151,6 +144,13 @@ if (!gotTheLock) {
     });
 
     handleArgs(process.argv);
+  });
+
+  // This only works on MacOS.
+  app.on("open-url", (event, url) => {
+    event.preventDefault();
+    BrowserWindow.getAllWindows().at(-1)?.focus();
+    handleURL(url);
   });
 
   // Quit when all windows are closed.
