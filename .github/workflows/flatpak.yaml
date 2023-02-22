@@ -5,6 +5,7 @@ on:
       - main
       - feature/*
       - feat/*
+      - bug/*
     tags-ignore:
       - v*
   release:
