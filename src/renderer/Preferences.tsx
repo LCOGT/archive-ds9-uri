@@ -84,7 +84,7 @@ export const Preferences = ({ onClose }: PreferncesProps) => {
         const result = await window.main.showOpenDialog({
           title: "Select DS9 executable",
           buttonLabel: "Select",
-          properties: ["openFile"],
+          properties: ["openFile", "treatPackageAsDirectory"],
         });
 
         if (result.canceled) {
