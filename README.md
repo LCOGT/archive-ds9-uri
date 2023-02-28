@@ -36,7 +36,7 @@ To get around that, please configure the archive-ds9-uri to use the ds9 executab
 1. Launch archive-ds9-uri
 2. Navigate to the preferences pane
 3. Under `Preferences->DS9->Executable`, click the folder to update the location of your DS9 executable. A finder window will open.
-4. Select `/Applications/SAOImageDS9.app/Contents/MacOS/ds9`. (Note for different versions of DS9 this path may be slightly different)
+4. Type Command+Shift+g, a dialog will open allowing you to specify a path to the ds9 executable. Begin typing `/Applications/SAOImageDS9.app/Contents/MacOS/ds9`. (Note for different versions of DS9 this path may be slightly different)
 
 ### Linux
 
