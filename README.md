@@ -40,6 +40,8 @@ To get around that, please configure the archive-ds9-uri to use the ds9 executab
 5. Select the ds9 executable that appears
 6. Save preferences
 
+[Screencast from 2023-03-30 11-36-37.webm](https://user-images.githubusercontent.com/95394050/228932615-5a6a5452-2cf7-4294-8a8e-2603cc129f00.webm)
+
 ### Linux
 
 Download the `.flatpak` file and install it using:
