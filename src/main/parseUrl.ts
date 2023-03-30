@@ -33,6 +33,10 @@ export const parseUrl = (url: string): Result<ParsedUrl, string> => {
     })
     .flatMap((y) => y);
 
+  if (frameIds.length === 0) {
+    return Result.Err("Must specify at least 1 `frame_ids`");
+  }
+
   if (!u.searchParams.has("frame_url")) {
     return Result.Err("Must specify `frame_url` query parameter.");
   }
