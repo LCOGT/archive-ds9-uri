@@ -433,6 +433,7 @@ const FramesTable = ({ frames }: { frames: FrameState[] }) => {
           name: "File",
           textOnly: true,
           dataType: "string",
+          sortable: ({ filename }) => filename,
           render: (record: FrameState) => {
             if (record.status === "Downloaded") {
               return (
