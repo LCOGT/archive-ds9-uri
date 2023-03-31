@@ -497,23 +497,24 @@ const launchDs9 = async (
   const args = [...shelx.split(ds9Args), ...frames.map((f) => f.filepath)];
 
   let command = p.ds9.path;
+  const commandArgs = [...args];
 
   // If we're running in a Flatpak we have to wrap the call to DS9 with
   // 'flatpak-spawn --host' so that from DS9's POV it's still running on the
   // Host with all of the Host shared libraries that it needs.
   if (process.env.FLATPAK_ID !== undefined) {
-    args.unshift("--host", command);
+    commandArgs.unshift("--host", command);
     command = "flatpak-spawn";
   }
 
-  const ds9 = spawn(command, args, {
+  const ds9 = spawn(command, commandArgs, {
     signal,
     windowsHide: true,
     shell: false,
   });
 
   launchTaskStore.set((s) => {
-    s[taskId].stdout.push(`$ ds9 ${args.join(" ")}`);
+    s[taskId].stdout.push(`$ ds9 ${shelx.join(args)}`);
   });
 
   ds9.on("spawn", () => {
