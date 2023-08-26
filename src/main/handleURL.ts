@@ -189,7 +189,7 @@ const LaunchTask = (url: ParsedUrl) => {
     await ensureDs9(prefs);
 
     // fetch frame metadata
-    await updateAllFramesMetadata(url, id, abortController.signal);
+    await updateAllFramesMetadata(url, id, abortController.signal, prefs.token);
 
     // download frames
     await downloadAllFrames(downloadDir, id, abortController.signal);
@@ -334,7 +334,8 @@ const downloadFrame = async (
 const updateAllFramesMetadata = async (
   url: ParsedUrl,
   taskId: string,
-  signal: AbortSignal
+  signal: AbortSignal,
+  token: string
 ) => {
   const siblingAbortController = new AbortController();
   signal.addEventListener("abort", () => {
@@ -346,7 +347,8 @@ const updateAllFramesMetadata = async (
       url,
       taskId,
       frameId,
-      siblingAbortController.signal
+      siblingAbortController.signal,
+      token
     ).catch((err) => {
       siblingAbortController.abort();
       throw err;
@@ -362,7 +364,8 @@ const updateFrameMetadata = pThrottle({ limit: 10, interval: 200 })(
     url: ParsedUrl,
     taskId: string,
     frameId: string,
-    signal: AbortSignal
+    signal: AbortSignal,
+    token: string
   ) => {
     launchTaskStore.set((s) => {
       s[taskId].frames[frameId] = {
@@ -375,7 +378,7 @@ const updateFrameMetadata = pThrottle({ limit: 10, interval: 200 })(
 
     const resp = await fetch(reqUrl.href, {
       headers: {
-        authorization: `Token ${url.token}`,
+        authorization: `Token ${token}`,
         "content-type": "application/json",
       },
       signal,

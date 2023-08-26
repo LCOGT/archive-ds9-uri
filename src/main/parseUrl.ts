@@ -6,7 +6,6 @@ import { Result } from "../common/result";
 export interface ParsedUrl {
   frameIds: string[];
   frameUrl: URL;
-  token: string;
   raw: URL;
 }
 
@@ -56,15 +55,15 @@ export const parseUrl = (url: string): Result<ParsedUrl, string> => {
     );
   }
 
-  if (!u.searchParams.has("token")) {
-    return Result.Err("Must specify `token` query parameter.");
+  if (u.searchParams.has("token")) {
+    return Result.Err(
+      "Specifying `token` in query parameter is no longer supported. Set the API token in Preferences."
+    );
   }
-  const token = u.searchParams.getAll("token").at(-1);
 
   return Result.Ok({
     frameIds,
     frameUrl,
-    token,
     raw: u,
   });
 };
