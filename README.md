@@ -4,7 +4,6 @@ Open Archive API frames in DS9
 
 [Screencast from 2023-03-31 15-19-29.webm](https://user-images.githubusercontent.com/95394050/229242964-79656f31-89cc-4e0e-acd6-1f4d75db3d36.webm)
 
-
 ## What is this?
 
 [DS9](https://sites.google.com/cfa.harvard.edu/saoimageds9) is de-facto the
